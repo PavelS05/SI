@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carrier;
 use Illuminate\Http\Request;
 
 class CarrierController extends Controller
@@ -11,14 +12,9 @@ class CarrierController extends Controller
         $query = Carrier::query();
 
         if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('mc', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('contact_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('phone', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('email', 'LIKE', "%{$searchTerm}%");
-            });
+            $query->where('name', 'LIKE', "%{$request->search}%")
+                  ->orWhere('mc', 'LIKE', "%{$request->search}%")
+                  ->orWhere('contact_name', 'LIKE', "%{$request->search}%");
         }
 
         $carriers = $query->paginate(15);

@@ -16,28 +16,26 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Rute protejate care necesită autentificare
-Route::middleware(['auth'])->group(function () {
-    // Dashboard
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
-    // Loads - accesibile pentru toate rolurile
+    // Rute pentru loads - accesibile tuturor
     Route::resource('loads', LoadController::class);
     
-    // Carriers - accesibile pentru ops și csr
-    Route::middleware(['role:ops,csr'])->group(function () {
+    // Rute pentru carriers - doar pentru ops și csr
+    Route::middleware('can:access-carriers')->group(function () {
         Route::resource('carriers', CarrierController::class);
     });
     
-    // Customers - accesibile pentru sales și csr
-    Route::middleware(['role:sales,csr'])->group(function () {
+    // Rute pentru customers - doar pentru sales și csr
+    Route::middleware('can:access-customers')->group(function () {
         Route::resource('costumers', CostumerController::class);
     });
     
-    // Users - doar pentru admin
-    Route::middleware(['role:admin'])->group(function () {
+    // Rute pentru useri - doar pentru admin
+    Route::middleware('can:access-admin')->group(function () {
         Route::resource('users', UserController::class);
     });
 });
