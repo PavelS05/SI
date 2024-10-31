@@ -117,7 +117,7 @@
                                     ondblclick="window.location.href='{{ route('loads.edit', $load) }}'"
                                     data-load-id="{{ $load->id }}">
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $load->load_number }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $load->costumer }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $load->customer }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $load->carrier }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $load->pu_date }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ $load->del_date }}</td>

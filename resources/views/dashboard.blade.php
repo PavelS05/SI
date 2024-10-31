@@ -38,7 +38,7 @@
                     <div class="flex items-center justify-between border-b pb-2">
                         <div>
                             <p class="font-medium text-sm">Load #{{ $load->load_number }}</p>
-                            <p class="text-xs text-gray-600">{{ $load->costumer }}</p>
+                            <p class="text-xs text-gray-600">{{ $load->customer }}</p>
                         </div>
                         <span
                             class="px-2 py-1 text-xs font-semibold rounded-full

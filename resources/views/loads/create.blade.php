@@ -3,632 +3,805 @@
 @section('title', isset($load) ? 'Edit Load' : 'Create Load')
 
 @section('content')
-    <div class="max-w-7xl mx-auto py-6 px-4">
-        <h2 class="text-2xl font-bold mb-6">{{ isset($load) ? 'Edit Load' : 'Create Load' }}</h2>
-
-        <form action="{{ isset($load) ? route('loads.update', $load) : route('loads.store') }}" method="POST">
-            @csrf
-            @if (isset($load))
-                @method('PUT')
-            @endif
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Load Info Card -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium mb-4">Load Info</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Load #</label>
-                            <input type="text" disabled value="{{ $load->load_number ?? 'Will be generated' }}"
-                                class="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Sales Rep</label>
-                            <input type="text" name="sales" value="{{ $load->sales ?? auth()->user()->username }}"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
-                                {{ auth()->user()->role !== 'admin' ? 'readonly' : '' }}>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Dispatcher</label>
-                            <input type="text" name="dispatcher" value="{{ $load->dispatcher ?? '' }}"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"
-                                {{ auth()->user()->role !== 'admin' && auth()->user()->role !== 'ops' ? 'readonly' : '' }}>
-                        </div>
-                        <!-- În view pentru client/costumer -->
-                        <div>
-                            <label class="text-sm font-medium text-gray-700">Client</label>
-                            <div class="relative">
-                                <input type="text" id="costumer-input" name="name" value="{{ old('name') }}"
-                                    placeholder="Search client..."
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2">
-
-                                <!-- Dropdown pentru rezultate -->
-                                <div id="costumer-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Rate</label>
-                            <div class="mt-1 relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 sm:text-sm">$</span>
-                                </div>
-                                <input type="number" name="costumer_rate" value="{{ $load->costumer_rate ?? '' }}"
-                                    class="pl-7 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
+    <div class="min-h-screen bg-gray-50 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header cu Load Number -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">
+                            {{ isset($load) ? 'Edit Load' : 'Create Load' }}
+                        </h1>
+                        <div class="mt-2">
+                            <span class="text-sm text-gray-500">Load #:</span>
+                            <span class="ml-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+                                {{ $load->load_number ?? 'Auto-generated' }}
+                            </span>
                         </div>
                     </div>
-                </div>
-
-                <!-- Carrier Card -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium mb-4">Carrier</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Carrier Name</label>
-                            <div class="relative">
-                                <input type="text" id="carrier-input" name="carrier" placeholder="Search carrier..."
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                                <div id="carrier-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                </div>
-                            </div>
+                    @if (isset($load))
+                        <div class="text-right">
+                            <span
+                                class="px-3 py-1 text-sm rounded-full {{ $load->status === 'New'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : ($load->status === 'Delivered'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-yellow-100 text-yellow-800') }}">
+                                {{ $load->status }}
+                            </span>
                         </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Rate</label>
-                            <div class="mt-1 relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 sm:text-sm">$</span>
-                                </div>
-                                <input type="number" name="carrier_rate" id="carrier-rate"
-                                    class="pl-7 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Service Type</label>
-                            <input type="text" name="service" id="carrier-service"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Notes</label>
-                            <textarea name="notes" id="carrier-notes" rows="3"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Shipper Card -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium mb-4">Shipper</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Facility Name</label>
-                            <div class="relative">
-                                <div class="flex gap-2">
-                                    <input type="text" id="shipper-input" placeholder="Search shipper..."
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2">
-                                    <button type="button" onclick="openLocationModal('shipper')"
-                                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
-                                    <button type="button" onclick="editLocation('shipper')"
-                                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div id="shipper-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                </div>
-                            </div>
-                            <div class="relative">
-                                <label class="block text-sm font-medium text-gray-700">Address</label>
-                                <input type="text" id="shipper-address" name="shipper_address"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></input>
-                                <div id="shipper-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">PU Date</label>
-                                <input type="date" name="pu_date" value="{{ $load->pu_date ?? '' }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">PO #</label>
-                                <input type="text" name="po" value="{{ $load->po ?? '' }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Appointment</label>
-                            <input type="text" name="pu_appt" value="{{ $load->pu_appt ?? '' }}"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                        </div>
-
-                        <div class="flex items-center space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="pickup_type" value="fcfs" class="form-radio"
-                                    {{ isset($load) && $load->pickup_type === 'fcfs' ? 'checked' : '' }}>
-                                <span class="ml-2">FCFS</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="pickup_type" value="by_appt" class="form-radio"
-                                    {{ isset($load) && $load->pickup_type === 'by_appt' ? 'checked' : '' }}>
-                                <span class="ml-2">By Appt.</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Receiver Card -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-medium mb-4">Receiver</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Facility Name</label>
-                            <div class="relative">
-                                <div class="flex gap-2">
-                                    <input type="text" id="receiver-input" placeholder="Search receiver..."
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2">
-                                    <button type="button" onclick="openLocationModal('receiver')"
-                                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4v16m8-8H4" />
-                                        </svg>
-                                    </button>
-                                    <button type="button" onclick="editLocation('receiver')"
-                                        class="p-2 bg-gray-100 rounded-full hover:bg-gray-200">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <div id="receiver-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                                </div>
-                            </div>
-                            <div class="relative">
-                                <label class="block text-sm font-medium text-gray-700">Address</label>
-                                <input type="text" id="receiver-address" name="receiver_address"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></input>
-                                <div id="receiver-dropdown"
-                                    class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">DEL Date</label>
-                                <input type="date" name="del_date" value="{{ $load->del_date ?? '' }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">DEL #</label>
-                                <input type="text" name="del" value="{{ $load->del ?? '' }}"
-                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Appointment</label>
-                            <input type="text" name="del_appt" value="{{ $load->del_appt ?? '' }}"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                        </div>
-
-                        <div class="flex items-center space-x-4">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="delivery_type" value="fcfs" class="form-radio"
-                                    {{ isset($load) && $load->delivery_type === 'fcfs' ? 'checked' : '' }}>
-                                <span class="ml-2">FCFS</span>
-                            </label>
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="delivery_type" value="by_appt" class="form-radio"
-                                    {{ isset($load) && $load->delivery_type === 'by_appt' ? 'checked' : '' }}>
-                                <span class="ml-2">By Appt.</span>
-                            </label>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="mt-6 flex justify-end space-x-4">
-                <button type="button" onclick="window.location.href='{{ route('loads.index') }}'"
-                    class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    Clear
-                </button>
-                <button type="submit"
-                    class="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    {{ isset($load) ? 'Update Load' : 'Save Load' }}
-                </button>
-            </div>
-        </form>
+            <!-- Main Form -->
+            <form action="{{ isset($load) ? route('loads.update', $load) : route('loads.store') }}" method="POST">
+                @csrf
+                @if (isset($load))
+                    @method('PUT')
+                @endif
+
+                <!-- Grid pentru cele 4 secțiuni -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Load Info Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="mb-4 pb-2 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Load Information</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Sales -->
+                                <div>
+                                    <label for="sales" class="block text-sm font-medium text-gray-700">Sales*</label>
+                                    <input type="text" id="sales" name="sales"
+                                        value="{{ isset($load) ? $load->sales : Auth::user()->username }}"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        {{ auth()->user()->role !== 'admin' ? 'readonly' : '' }}>
+                                </div>
+
+                                <!-- Customer -->
+                                <div>
+                                    <label for="customer_search"
+                                        class="block text-sm font-medium text-gray-700">Customer*</label>
+                                    <div class="relative mt-1">
+                                        <input type="text" id="customer_search" name="customer_search"
+                                            value="{{ $load->customer ?? '' }}"
+                                            class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            placeholder="Search or enter customer name...">
+                                        <input type="hidden" id="customer" name="customer"
+                                            value="{{ $load->customer ?? '' }}">
+                                        <div id="customer_suggestions"
+                                            class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Customer Rate -->
+                                <div>
+                                    <label for="customer_rate" class="block text-sm font-medium text-gray-700">Customer
+                                        Rate*</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" step="0.01" id="customer_rate" name="customer_rate"
+                                            value="{{ $load->customer_rate ?? '' }}"
+                                            class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- Service -->
+                                <div>
+                                    <label for="service" class="block text-sm font-medium text-gray-700">Service*</label>
+                                    <select id="service" name="service" required
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Select Service</option>
+                                        @foreach (['FTL', 'LTL', 'Flatbed', 'Power Only', 'Hotshot', 'Box Truck', 'Sprinter Van'] as $service)
+                                            <option value="{{ $service }}"
+                                                {{ isset($load) && $load->service == $service ? 'selected' : '' }}>
+                                                {{ $service }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- PO Number -->
+                                <div>
+                                    <label for="po" class="block text-sm font-medium text-gray-700">PO</label>
+                                    <input type="text" id="po" name="po" value="{{ $load->po ?? '' }}"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </div>
+
+                                <!-- Status -->
+                                <div>
+                                    <label for="status" class="block text-sm font-medium text-gray-700">Status*</label>
+                                    <select id="status" name="status" required
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        @foreach (['New', 'Assigned', 'In Transit', 'Delivered'] as $status)
+                                            <option value="{{ $status }}"
+                                                {{ isset($load) && $load->status == $status ? 'selected' : '' }}>
+                                                {{ $status }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Carrier Info Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="mb-4 pb-2 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Carrier Information</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Carrier -->
+                                <div>
+                                    <label for="carrier_search"
+                                        class="block text-sm font-medium text-gray-700">Carrier</label>
+                                    <div class="relative mt-1">
+                                        <input type="text" id="carrier_search" name="carrier_search"
+                                            value="{{ $load->carrier ?? '' }}"
+                                            class="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                            placeholder="Search or enter carrier name...">
+                                        <input type="hidden" id="carrier" name="carrier"
+                                            value="{{ $load->carrier ?? '' }}">
+                                        <div id="carrier_suggestions"
+                                            class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Carrier Rate -->
+                                <div>
+                                    <label for="carrier_rate" class="block text-sm font-medium text-gray-700">Carrier
+                                        Rate</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" step="0.01" id="carrier_rate" name="carrier_rate"
+                                            value="{{ $load->carrier_rate ?? '' }}"
+                                            class="block w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+
+                                <!-- Dispatcher -->
+                                <div>
+                                    <label for="dispatcher"
+                                        class="block text-sm font-medium text-gray-700">Dispatcher</label>
+                                    <input type="text" id="dispatcher" name="dispatcher"
+                                        value="{{ $load->dispatcher ?? '' }}"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        {{ auth()->user()->role !== 'admin' && auth()->user()->role !== 'ops' ? 'readonly' : '' }}>
+                                </div>
+
+                                <!-- Equipment Type -->
+                                <div>
+                                    <label for="equipment_type" class="block text-sm font-medium text-gray-700">Equipment
+                                        Type</label>
+                                    <select id="equipment_type" name="equipment_type"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                        <option value="">Select Equipment</option>
+                                        <option value="Dry Van"
+                                            {{ isset($load) && $load->equipment_type == 'Dry Van' ? 'selected' : '' }}>
+                                            Dry Van</option>
+                                        <option value="Reefer"
+                                            {{ isset($load) && $load->equipment_type == 'Reefer' ? 'selected' : '' }}>
+                                            Reefer</option>
+                                        <option value="Flatbed"
+                                            {{ isset($load) && $load->equipment_type == 'Flatbed' ? 'selected' : '' }}>
+                                            Flatbed</option>
+                                        <option value="Step Deck"
+                                            {{ isset($load) && $load->equipment_type == 'Step Deck' ? 'selected' : '' }}>
+                                            Step Deck</option>
+                                    </select>
+                                </div>
+
+                                <!-- Driver Contact -->
+                                <div>
+                                    <label for="driver_contact" class="block text-sm font-medium text-gray-700">Driver
+                                        Contact</label>
+                                    <input type="text" id="driver_contact" name="driver_contact"
+                                        value="{{ $load->driver_contact ?? '' }}"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="Enter driver's phone number">
+                                </div>
+
+                                <!-- Driver Name -->
+                                <div>
+                                    <label for="driver_name" class="block text-sm font-medium text-gray-700">Driver
+                                        Name</label>
+                                    <input type="text" id="driver_name" name="driver_name"
+                                        value="{{ $load->driver_name ?? '' }}"
+                                        class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                        placeholder="Enter driver's name">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Shipper Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="mb-4 pb-2 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Shipper Information</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Shipper Name and Search -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <label for="shipper_name" class="block text-sm font-medium text-gray-700">Shipper
+                                            Name</label>
+                                        <div class="flex space-x-2">
+                                            <button type="button" data-modal-target="locationModal"
+                                                data-location-type="shipper" data-action="create"
+                                                class="text-sm text-blue-600 hover:text-blue-700">
+                                                <i class="fas fa-plus-circle mr-1"></i>Add New
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 relative">
+                                        <input type="text" id="shipper_search" placeholder="Search locations..."
+                                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            autocomplete="off">
+                                        <input type="hidden" id="shipper_id" name="shipper_id">
+                                        <div id="shipper_suggestions"
+                                            class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden max-h-60 overflow-y-auto">
+                                        </div>
+                                    </div>
+
+                                    <!-- Shipper Details Card -->
+                                    <div id="shipper_details"
+                                        class="mt-3 p-4 border border-gray-200 rounded-lg bg-gray-50 hidden">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 id="selected_shipper_name" class="font-medium text-gray-900"></h4>
+                                                <p id="selected_shipper_address" class="text-sm text-gray-600 mt-1"></p>
+                                                <p id="selected_shipper_notes" class="text-sm text-gray-500 mt-1 italic">
+                                                </p>
+                                            </div>
+                                            <button type="button" data-modal-target="locationModal"
+                                                data-location-type="shipper" data-action="edit"
+                                                class="text-sm text-blue-600 hover:text-blue-700">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pickup Date -->
+                                <div>
+                                    <label for="pu_date" class="block text-sm font-medium text-gray-700">Pickup
+                                        Date*</label>
+                                    <input type="date" id="pu_date" name="pu_date" required
+                                        value="{{ $load->pu_date ?? '' }}"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                </div>
+
+                                <!-- Pickup Appointment -->
+                                <div>
+                                    <label for="pu_appt" class="block text-sm font-medium text-gray-700">Pickup
+                                        Appointment</label>
+                                    <input type="text" id="pu_appt" name="pu_appt"
+                                        value="{{ $load->pu_appt ?? '' }}"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        placeholder="Enter appointment time">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receiver Section -->
+                    <div class="bg-white rounded-lg shadow-sm p-6">
+                        <div class="mb-4 pb-2 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Receiver Information</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Receiver Name and Search -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <label for="receiver_name"
+                                            class="block text-sm font-medium text-gray-700">Receiver Name</label>
+                                        <div class="flex space-x-2">
+                                            <button type="button" data-modal-target="locationModal"
+                                                data-location-type="receiver" data-action="create"
+                                                class="text-sm text-blue-600 hover:text-blue-700">
+                                                <i class="fas fa-plus-circle mr-1"></i>Add New
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-1 relative">
+                                        <input type="text" id="receiver_search" placeholder="Search locations..."
+                                            class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                            autocomplete="off">
+                                        <input type="hidden" id="receiver_id" name="receiver_id">
+                                        <div id="receiver_suggestions"
+                                            class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden max-h-60 overflow-y-auto">
+                                        </div>
+                                    </div>
+
+                                    <!-- Receiver Details Card -->
+                                    <div id="receiver_details"
+                                        class="mt-3 p-4 border border-gray-200 rounded-lg bg-gray-50 hidden">
+                                        <div class="flex justify-between items-start">
+                                            <div>
+                                                <h4 id="selected_receiver_name" class="font-medium text-gray-900"></h4>
+                                                <p id="selected_receiver_address" class="text-sm text-gray-600 mt-1"></p>
+                                                <p id="selected_receiver_notes" class="text-sm text-gray-500 mt-1 italic">
+                                                </p>
+                                            </div>
+                                            <button type="button" data-modal-target="locationModal"
+                                                data-location-type="receiver" data-action="edit"
+                                                class="text-sm text-blue-600 hover:text-blue-700">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delivery Date -->
+                                <div>
+                                    <label for="del_date" class="block text-sm font-medium text-gray-700">Delivery
+                                        Date*</label>
+                                    <input type="date" id="del_date" name="del_date" required
+                                        value="{{ $load->del_date ?? '' }}"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                </div>
+
+                                <!-- Delivery Appointment -->
+                                <div>
+                                    <label for="del_appt" class="block text-sm font-medium text-gray-700">Delivery
+                                        Appointment</label>
+                                    <input type="text" id="del_appt" name="del_appt"
+                                        value="{{ $load->del_appt ?? '' }}"
+                                        class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        placeholder="Enter appointment time">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-6 bg-gray-50 px-6 py-4 flex items-center justify-end space-x-4 rounded-lg">
+                        <a href="{{ route('loads.index') }}"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            Cancel
+                        </a>
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="{{ isset($load) ? 'M5 13l4 4L19 7' : 'M12 6v6m0 0v6m0-6h6m-6 0H6' }}" />
+                            </svg>
+                            {{ isset($load) ? 'Update Load' : 'Create Load' }}
+                        </button>
+                    </div>
+            </form>
+        </div>
     </div>
+
+
+    <!-- Location Modal -->
+    <div id="locationModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title"
+        role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <form id="locationForm" class="p-6">
+                    @csrf
+                    <input type="hidden" id="locationType" name="locationType" value="">
+                    <input type="hidden" id="locationId" name="locationId" value="">
+                    <input type="hidden" id="formAction" name="formAction" value="create">
+
+                    <div class="mb-4 flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900" id="modal-title">Add New Location</h3>
+                        <div id="deleteLocationBtn" class="hidden">
+                            <button type="button" class="text-red-600 hover:text-red-700">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="formErrorAlert" class="mb-4 bg-red-50 text-red-600 p-4 rounded-md hidden"></div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="facility_name" class="block text-sm font-medium text-gray-700">Facility
+                                Name</label>
+                            <input type="text" name="facility_name" id="facility_name" required
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                            <input type="text" name="address" id="address" required
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                            <textarea name="notes" id="notes" rows="3"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 sm:mt-6 flex space-x-3">
+                        <button type="button" id="cancelLocation"
+                            class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                            Save Location
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const carrierInput = document.getElementById('carrier-input');
-                const carrierDropdown = document.getElementById('carrier-dropdown');
-                let currentCarrier = null;
+                const modal = document.getElementById('locationModal');
+                const form = document.getElementById('locationForm');
+                const locationTypeInput = document.getElementById('locationType');
+                const locationIdInput = document.getElementById('locationId');
+                const formActionInput = document.getElementById('formAction');
+                const modalTitle = document.getElementById('modal-title');
+                const deleteBtn = document.getElementById('deleteLocationBtn');
+                const errorAlert = document.getElementById('formErrorAlert');
 
-                const searchCarriers = debounce(async function(query) {
-                    if (query.length < 2) {
-                        carrierDropdown.classList.add('hidden');
-                        return;
-                    }
-
+                // Function to handle location search
+                async function searchLocations(searchTerm, type) {
                     try {
-                        const response = await fetch(`/search/carriers?query=${encodeURIComponent(query)}`);
-                        const carriers = await response.json();
+                        const response = await fetch(`/locations/search?query=${encodeURIComponent(searchTerm)}`);
+                        const locations = await response.json();
+                        return locations;
+                    } catch (error) {
+                        console.error('Error searching locations:', error);
+                        return [];
+                    }
+                }
 
-                        carrierDropdown.innerHTML = '';
+                // Setup location search for both shipper and receiver
+                ['shipper', 'receiver'].forEach(type => {
+                    const searchInput = document.getElementById(`${type}_search`);
+                    const suggestionsDiv = document.getElementById(`${type}_suggestions`);
+                    const detailsDiv = document.getElementById(`${type}_details`);
 
-                        if (carriers.length === 0) {
-                            carrierDropdown.classList.add('hidden');
+                    let searchTimeout;
+
+                    searchInput.addEventListener('input', function() {
+                        clearTimeout(searchTimeout);
+                        const query = this.value.trim();
+
+                        if (query.length < 2) {
+                            suggestionsDiv.classList.add('hidden');
                             return;
                         }
 
-                        carriers.forEach(carrier => {
-                            const div = document.createElement('div');
-                            div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                        searchTimeout = setTimeout(async () => {
+                            const locations = await searchLocations(query);
+                            suggestionsDiv.innerHTML = '';
 
-                            // Afișăm informații relevante în dropdown
-                            const displayText = carrier.mc ?
-                                `${carrier.name} (MC: ${carrier.mc})` :
-                                carrier.name;
+                            if (locations.length > 0) {
+                                locations.forEach(location => {
+                                    const div = document.createElement('div');
+                                    div.className =
+                                        'p-2 hover:bg-gray-100 cursor-pointer';
+                                    div.innerHTML = `
+                            <div class="font-medium">${location.facility_name}</div>
+                            <div class="text-sm text-gray-600">${location.address}</div>
+                        `;
+                                    div.addEventListener('click', () => {
+                                        selectLocation(location, type);
+                                        suggestionsDiv.classList.add(
+                                            'hidden');
+                                    });
+                                    suggestionsDiv.appendChild(div);
+                                });
+                                suggestionsDiv.classList.remove('hidden');
+                            } else {
+                                suggestionsDiv.classList.add('hidden');
+                            }
+                        }, 300);
+                    });
 
-                            div.textContent = displayText;
-                            div.addEventListener('click', () => {
-                                currentCarrier = carrier;
-                                carrierInput.value = carrier.name;
+                    // Hide suggestions when clicking outside
+                    document.addEventListener('click', function(e) {
+                        if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target)) {
+                            suggestionsDiv.classList.add('hidden');
+                        }
+                    });
+                });
 
-                                // Populăm restul câmpurilor
-                                if (document.getElementById('carrier-mc')) {
-                                    document.getElementById('carrier-mc').value = carrier
-                                        .mc || '';
-                                }
-                                if (document.getElementById('carrier-contact')) {
-                                    document.getElementById('carrier-contact').value =
-                                        carrier.contact_name || '';
-                                }
-                                if (document.getElementById('carrier-phone')) {
-                                    document.getElementById('carrier-phone').value = carrier
-                                        .phone || '';
-                                }
-                                if (document.getElementById('carrier-email')) {
-                                    document.getElementById('carrier-email').value = carrier
-                                        .email || '';
-                                }
-                                if (document.getElementById('carrier-notes')) {
-                                    document.getElementById('carrier-notes').value = carrier
-                                        .notes || '';
-                                }
+                // Function to select a location
+                function selectLocation(location, type) {
+                    const detailsDiv = document.getElementById(`${type}_details`);
+                    const searchInput = document.getElementById(`${type}_search`);
+                    const idInput = document.getElementById(`${type}_id`);
 
-                                carrierDropdown.classList.add('hidden');
-                            });
-                            carrierDropdown.appendChild(div);
+                    document.getElementById(`selected_${type}_name`).textContent = location.facility_name;
+                    document.getElementById(`selected_${type}_address`).textContent = location.address;
+                    document.getElementById(`selected_${type}_notes`).textContent = location.notes || '';
+
+                    searchInput.value = location.facility_name;
+                    idInput.value = location.id;
+                    detailsDiv.classList.remove('hidden');
+                }
+
+                // Open modal handler
+                document.querySelectorAll('[data-modal-target="locationModal"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const locationType = this.getAttribute('data-location-type');
+                        const action = this.getAttribute('data-action');
+                        locationTypeInput.value = locationType;
+                        formActionInput.value = action;
+
+                        if (action === 'edit') {
+                            const locationId = document.getElementById(`${locationType}_id`).value;
+                            if (!locationId) return;
+
+                            loadLocationForEdit(locationId);
+                            modalTitle.textContent = 'Edit Location';
+                            deleteBtn.classList.remove('hidden');
+                        } else {
+                            modalTitle.textContent = 'Add New Location';
+                            form.reset();
+                            deleteBtn.classList.add('hidden');
+                        }
+
+                        modal.classList.remove('hidden');
+                    });
+                });
+
+                // Load location for editing
+                async function loadLocationForEdit(locationId) {
+                    try {
+                        console.log('Loading location with ID:', locationId);
+
+                        const response = await fetch(`/locations/${locationId}`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
                         });
 
-                        carrierDropdown.classList.remove('hidden');
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('Response data:', data);
+
+                        if (data.success) {
+                            document.getElementById('facility_name').value = data.location.facility_name;
+                            document.getElementById('address').value = data.location.address;
+                            document.getElementById('notes').value = data.location.notes || '';
+                            document.getElementById('locationId').value = data.location.id;
+                            errorAlert.classList.add('hidden');
+                        } else {
+                            throw new Error(data.message || 'Failed to load location data');
+                        }
                     } catch (error) {
-                        console.error('Error searching carriers:', error);
+                        console.error('Error loading location:', error);
+                        errorAlert.textContent = error.message;
+                        errorAlert.classList.remove('hidden');
                     }
-                }, 300);
+                }
 
-                carrierInput.addEventListener('input', (e) => {
-                    searchCarriers(e.target.value);
-                });
+                // Modificăm handler-ul pentru deschiderea modalului
+                document.querySelectorAll('[data-modal-target="locationModal"]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const locationType = this.getAttribute('data-location-type');
+                        const action = this.getAttribute('data-action');
+                        locationTypeInput.value = locationType;
+                        formActionInput.value = action;
 
-                // Închide dropdown-ul când se face click în afara lui
-                document.addEventListener('click', function(e) {
-                    if (!carrierInput.contains(e.target) && !carrierDropdown.contains(e.target)) {
-                        carrierDropdown.classList.add('hidden');
-                    }
-                });
-
-                // Resetare câmpuri când se șterge carrier-ul
-                carrierInput.addEventListener('change', function(e) {
-                    if (!e.target.value) {
-                        currentCarrier = null;
-                        // Resetăm toate câmpurile
-                        ['mc', 'contact', 'phone', 'email', 'notes'].forEach(field => {
-                            const element = document.getElementById(`carrier-${field}`);
-                            if (element) element.value = '';
-                        });
-                    }
-                });
-            });
-        </script>
-        <script>
-            function debounce(func, wait) {
-                let timeout;
-                return function executedFunction(...args) {
-                    const later = () => {
-                        clearTimeout(timeout);
-                        func(...args);
-                    };
-                    clearTimeout(timeout);
-                    timeout = setTimeout(later, wait);
-                };
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-                const costumerInput = document.getElementById('costumer-input');
-                const costumerDropdown = document.getElementById('costumer-dropdown');
-
-                const searchCostumers = debounce(function(query) {
-                    if (query.length < 2) {
-                        costumerDropdown.classList.add('hidden');
-                        return;
-                    }
-
-                    fetch(`/search/costumers?query=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Received data:', data); // Pentru debug
-                            costumerDropdown.innerHTML = '';
-
-                            if (data.length === 0) {
-                                costumerDropdown.classList.add('hidden');
+                        if (action === 'edit') {
+                            // Găsim ID-ul locației selectate
+                            const locationId = document.getElementById(`${locationType}_id`).value;
+                            if (!locationId) {
+                                errorAlert.textContent = 'Please select a location first';
+                                errorAlert.classList.remove('hidden');
                                 return;
                             }
 
-                            data.forEach(costumer => {
-                                const div = document.createElement('div');
-                                div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
-                                div.textContent = costumer.name;
-                                div.addEventListener('click', () => {
-                                    costumerInput.value = costumer.name;
-                                    costumerDropdown.classList.add('hidden');
-                                });
-                                costumerDropdown.appendChild(div);
-                            });
+                            loadLocationForEdit(locationId);
+                            modalTitle.textContent = 'Edit Location';
+                            deleteBtn.classList.remove('hidden');
+                        } else {
+                            modalTitle.textContent = 'Add New Location';
+                            form.reset();
+                            deleteBtn.classList.add('hidden');
+                        }
 
-                            costumerDropdown.classList.remove('hidden');
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                        });
-                }, 300);
-
-                costumerInput.addEventListener('input', (e) => {
-                    searchCostumers(e.target.value);
+                        modal.classList.remove('hidden');
+                    });
                 });
 
-                // Închide dropdown-ul când se face click în afara lui
-                document.addEventListener('click', function(e) {
-                    if (!costumerInput.contains(e.target) && !costumerDropdown.contains(e.target)) {
-                        costumerDropdown.classList.add('hidden');
+                // Modificăm funcția de selectare a locației pentru a salva ID-ul
+                function selectLocation(location, type) {
+                    const detailsDiv = document.getElementById(`${type}_details`);
+                    const searchInput = document.getElementById(`${type}_search`);
+                    const idInput = document.getElementById(`${type}_id`);
+
+                    document.getElementById(`selected_${type}_name`).textContent = location.facility_name;
+                    document.getElementById(`selected_${type}_address`).textContent = location.address;
+                    if (location.notes) {
+                        document.getElementById(`selected_${type}_notes`).textContent = location.notes;
+                        document.getElementById(`selected_${type}_notes`).classList.remove('hidden');
+                    } else {
+                        document.getElementById(`selected_${type}_notes`).classList.add('hidden');
+                    }
+
+                    searchInput.value = location.facility_name;
+                    idInput.value = location.id; // Salvăm ID-ul locației
+                    detailsDiv.classList.remove('hidden');
+                }
+
+                // Modificăm handler-ul pentru submit-ul formularului
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    errorAlert.classList.add('hidden');
+
+                    const formData = {
+                        facility_name: document.getElementById('facility_name').value,
+                        address: document.getElementById('address').value,
+                        notes: document.getElementById('notes').value
+                    };
+
+                    try {
+                        const locationId = document.getElementById('locationId').value;
+                        const isEdit = formActionInput.value === 'edit';
+
+                        const url = isEdit ? `/locations/${locationId}` : '/locations';
+                        const method = isEdit ? 'PUT' : 'POST';
+
+                        const response = await fetch(url, {
+                            method: method,
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const type = locationTypeInput.value;
+                            selectLocation(data.location, type);
+                            modal.classList.add('hidden');
+                            form.reset();
+                            // Adăugăm un mesaj de succes temporar
+                            const successMessage = document.createElement('div');
+                            successMessage.className =
+                                'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
+                            successMessage.textContent = isEdit ? 'Location updated successfully' :
+                                'Location created successfully';
+                            document.body.appendChild(successMessage);
+                            setTimeout(() => successMessage.remove(), 3000);
+                        } else {
+                            throw new Error(data.message || 'Failed to save location');
+                        }
+                    } catch (error) {
+                        errorAlert.textContent = error.message;
+                        errorAlert.classList.remove('hidden');
+                    }
+                });
+
+                // Delete location handler
+                deleteBtn.addEventListener('click', async function() {
+                    if (!confirm('Are you sure you want to delete this location?')) return;
+
+                    try {
+                        const response = await fetch(`/locations/${locationIdInput.value}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .content
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            const type = locationTypeInput.value;
+                            document.getElementById(`${type}_search`).value = '';
+                            document.getElementById(`${type}_id`).value = '';
+                            document.getElementById(`${type}_details`).classList.add('hidden');
+                            modal.classList.add('hidden');
+                            form.reset();
+                        } else {
+                            throw new Error(data.message || 'Failed to delete location');
+                        }
+                    } catch (error) {
+                        errorAlert.textContent = error.message;
+                        errorAlert.classList.remove('hidden');
+                    }
+                });
+
+                // Cancel button handler
+                document.getElementById('cancelLocation').addEventListener('click', function() {
+                    modal.classList.add('hidden');
+                    form.reset();
+                    errorAlert.classList.add('hidden');
+                });
+
+                // Close modal when clicking outside
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                        form.reset();
+                        errorAlert.classList.add('hidden');
                     }
                 });
             });
         </script>
     @endpush
-
-
-    <!-- La sfârșitul view-ului -->
-    <form id="location-form" class="mt-2 space-y-6">
-        @csrf
-        <input type="hidden" name="_token" value="{{ csrf_token() }}">
-        <div id="location-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900" id="modal-title">Add Location</h3>
-                    <form id="location-form" class="mt-2 space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Facility Name</label>
-                            <input type="text" id="modal-facility-name" name="facility_name"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Address</label>
-                            <textarea id="modal-address" name="address" rows="3"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Notes</label>
-                            <textarea id="modal-notes" name="notes" rows="2"
-                                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></textarea>
-                        </div>
-
-                        <div class="mt-4 flex justify-end gap-4">
-                            <button type="button" onclick="closeLocationModal()"
-                                class="bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none">
-                                Cancel
-                            </button>
-                            <button type="submit"
-                                class="bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 border border-transparent rounded-md shadow-sm focus:outline-none">
-                                Save
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </form>
-
-
     @push('scripts')
         <script>
-            let currentLocationId = null;
-            let currentLocationType = null; // 'shipper' sau 'receiver'
+            document.addEventListener('DOMContentLoaded', function() {
+                function setupAutocomplete(searchInputId, hiddenInputId, suggestionsId, data) {
+                    const searchInput = document.getElementById(searchInputId);
+                    const hiddenInput = document.getElementById(hiddenInputId);
+                    const suggestions = document.getElementById(suggestionsId);
 
-            function closeLocationModal() {
-                document.getElementById('location-modal').classList.add('hidden');
-            }
+                    searchInput.addEventListener('input', function() {
+                        const value = this.value.toLowerCase();
+                        const matches = data.filter(item => item.name.toLowerCase().includes(value));
 
-            // Modifică event listener-ul formularului pentru a gestiona corect atât crearea cât și editarea
-            document.getElementById('location-form').addEventListener('submit', async function(e) {
-                e.preventDefault();
+                        suggestions.innerHTML = '';
+                        suggestions.classList.remove('hidden');
 
-                try {
-                    const formData = new URLSearchParams();
-                    formData.append('facility_name', document.getElementById('modal-facility-name').value);
-                    formData.append('address', document.getElementById('modal-address').value);
-                    formData.append('notes', document.getElementById('modal-notes').value || '');
-                    formData.append('_token', document.querySelector('input[name="_token"]').value);
-
-                    let url = '/locations'; // URL implicit pentru creare
-                    let method = 'POST'; // Metoda implicită pentru creare
-
-                    // Dacă avem un ID, atunci este un update
-                    if (currentLocationId) {
-                        url = `/locations/${currentLocationId}`;
-                        formData.append('_method', 'PUT');
-                    }
-
-                    console.log('Request URL:', url); // Pentru debugging
-                    console.log('Request Method:', method); // Pentru debugging
-
-                    const response = await fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
-                            'Accept': 'application/json'
-                        },
-                        body: formData
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.message || 'Error saving location');
-                    }
-
-                    const data = await response.json();
-
-                    if (data.success && data.location) {
-                        // Actualizează câmpurile în formular
-                        const input = document.getElementById(`${currentLocationType}-input`);
-                        const address = document.getElementById(`${currentLocationType}-address`);
-
-                        input.value = data.location.facility_name;
-                        address.value = data.location.address;
-
-                        closeLocationModal();
-                    } else {
-                        throw new Error('Invalid response format');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert(error.message || 'There was an error saving the location');
-                }
-            });
-
-            // Funcție pentru deschiderea modalului
-            function openLocationModal(type) {
-                currentLocationType = type;
-                currentLocationId = null; // Resetăm ID-ul când deschidem modalul pentru o locație nouă
-
-                // Resetăm formularul
-                document.getElementById('location-form').reset();
-
-                // Actualizăm titlul
-                document.getElementById('modal-title').textContent = 'Add Location';
-
-                // Afișăm modalul
-                document.getElementById('location-modal').classList.remove('hidden');
-            }
-
-            // Funcție pentru editarea unei locații existente
-            function editLocation(type) {
-                const input = document.getElementById(`${type}-input`);
-                if (!input.value) {
-                    alert('Please select a location first');
-                    return;
-                }
-
-                fetch(`/locations/search?query=${encodeURIComponent(input.value)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.length > 0) {
-                            const location = data[0];
-                            currentLocationId = location.id;
-                            currentLocationType = type;
-
-                            // Populăm modalul cu datele locației
-                            document.getElementById('modal-facility-name').value = location.facility_name;
-                            document.getElementById('modal-address').value = location.address;
-                            document.getElementById('modal-notes').value = location.notes || '';
-
-                            // Actualizăm titlul
-                            document.getElementById('modal-title').textContent = 'Edit Location';
-
-                            // Afișăm modalul
-                            document.getElementById('location-modal').classList.remove('hidden');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Error loading location details');
-                    });
-            }
-
-            // Inițializare căutare pentru shipper și receiver
-            function initializeLocationSearch(type) {
-                const input = document.getElementById(`${type}-input`);
-                const dropdown = document.getElementById(`${type}-dropdown`);
-                const address = document.getElementById(`${type}-address`);
-
-                input.addEventListener('input', debounce(function(e) {
-                    const query = e.target.value;
-
-                    if (query.length < 2) {
-                        dropdown.classList.add('hidden');
-                        return;
-                    }
-
-                    fetch(`/locations/search?query=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            dropdown.innerHTML = '';
-
-                            data.forEach(location => {
-                                const div = document.createElement('div');
-                                div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
-                                div.textContent = location.facility_name;
-                                div.addEventListener('click', () => {
-                                    input.value = location.facility_name;
-                                    address.value = location.address;
-                                    dropdown.classList.add('hidden');
-                                });
-                                dropdown.appendChild(div);
+                        matches.forEach(item => {
+                            const div = document.createElement('div');
+                            div.textContent = item.name;
+                            div.classList.add('p-2', 'hover:bg-gray-100', 'cursor-pointer');
+                            div.addEventListener('click', function() {
+                                searchInput.value = item.name;
+                                hiddenInput.value = item.name;
+                                suggestions.classList.add('hidden');
                             });
-
-                            if (data.length > 0) {
-                                dropdown.classList.remove('hidden');
-                            }
+                            suggestions.appendChild(div);
                         });
-                }, 300));
-            }
 
-            initializeLocationSearch('shipper');
-            initializeLocationSearch('receiver');
+                        if (matches.length === 0) {
+                            suggestions.classList.add('hidden');
+                        }
+                    });
+
+                    searchInput.addEventListener('change', function() {
+                        hiddenInput.value = this.value;
+                    });
+
+                    document.addEventListener('click', function(e) {
+                        if (e.target !== searchInput && e.target !== suggestions) {
+                            suggestions.classList.add('hidden');
+                        }
+                    });
+                }
+
+                const customers = @json($customers ?? []);
+                const carriers = @json($carriers ?? []);
+
+                setupAutocomplete('customer_search', 'customer', 'customer_suggestions', customers);
+                setupAutocomplete('carrier_search', 'carrier', 'carrier_suggestions', carriers);
+            });
         </script>
     @endpush
 @endsection

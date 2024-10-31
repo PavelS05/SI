@@ -3,10 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LoadController;
 use App\Http\Controllers\CarrierController;
-use App\Http\Controllers\CostumerController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SearchController;
 use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,7 +31,7 @@ Route::middleware('auth')->group(function () {
 
     // Rute pentru customers - doar pentru sales și csr
     Route::middleware('can:access-customers')->group(function () {
-        Route::resource('costumers', CostumerController::class);
+        Route::resource('customers', CustomerController::class);
     });
 
     // Rute pentru useri - doar pentru admin
@@ -42,12 +41,11 @@ Route::middleware('auth')->group(function () {
 
 
     Route::controller(LocationController::class)->group(function () {
+        Route::get('/locations', 'index');
         Route::get('/locations/search', 'search');
+        Route::get('/locations/{location}', 'show');  // Adăugăm această rută GET explicit
         Route::post('/locations', 'store');
         Route::put('/locations/{location}', 'update');
+        Route::delete('/locations/{location}', 'destroy');
     });
-
-    Route::get('/search/costumers', [SearchController::class, 'costumers']);
-    Route::get('/search/carriers', [SearchController::class, 'carriers']);
-
 });

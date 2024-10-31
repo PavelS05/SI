@@ -7,31 +7,34 @@ use Illuminate\Database\Eloquent\Model;
 class Load extends Model
 {
     protected $fillable = [
-        'load_number', 
-        'sales', 
-        'dispatcher', 
-        'costumer',
-        'costumer_rate', 
-        'carrier', 
-        'carrier_rate', 
+        'load_number',
+        'sales',
+        'dispatcher',
+        'customer',
+        'customer_rate',
+        'carrier',
+        'carrier_rate',
+        'equipment_type',  // câmp nou
+        'driver_name',     // câmp nou
+        'driver_contact',  // câmp nou
         'service',
-        'shipper_name', 
-        'shipper_address', 
-        'pu_date', 
+        'shipper_name',
+        'shipper_address',
+        'pu_date',
         'po',
-        'pu_appt', 
-        'receiver_name', 
+        'pu_appt',
+        'receiver_name',
         'receiver_address',
-        'del_date', 
-        'del', 
-        'del_appt', 
+        'del_date',
+        'del',
+        'del_appt',
         'status'
     ];
 
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($load) {
             if (!$load->load_number) {
                 $lastLoad = static::orderBy('id', 'desc')->first();
@@ -48,9 +51,9 @@ class Load extends Model
     }
 
     // Relație cu customer
-    public function costumerRelation()
+    public function customerRelation()
     {
-        return $this->belongsTo(Costumer::class, 'costumer');
+        return $this->belongsTo(Customer::class, 'customer');
     }
 
     // Relație cu user (sales)

@@ -7,7 +7,7 @@
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-800">Customers</h2>
-                <a href="{{ route('costumers.create') }}"
+                <a href="{{ route('customers.create') }}"
                     class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105">
                     <i class="fas fa-plus mr-2"></i>Add New Customer
                 </a>
@@ -15,7 +15,7 @@
 
             <!-- Search -->
             <div class="px-6 py-4 bg-gray-50">
-                <form action="{{ route('costumers.index') }}" method="GET">
+                <form action="{{ route('customers.index') }}" method="GET">
                     <div class="flex">
                         <input type="text" name="search" placeholder="Search customers..."
                             value="{{ request('search') }}"
@@ -50,32 +50,32 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($costumers as $costumer)
+                        @forelse($customers as $customer)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $costumer->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $costumer->contact_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $costumer->phone }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $costumer->email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">${{ number_format($costumer->credit, 2) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $customer->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $customer->contact_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $customer->phone }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ $customer->email }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${{ number_format($customer->credit, 2) }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                @if ($costumer->status === 'active') bg-green-100 text-green-800
+                                @if ($customer->status === 'active') bg-green-100 text-green-800
                                 @else bg-red-100 text-red-800 @endif">
-                                        {{ ucfirst($costumer->status) }}
+                                        {{ ucfirst($customer->status) }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('costumers.edit', $costumer) }}"
+                                    <a href="{{ route('customers.edit', $customer) }}"
                                         class="text-blue-600 hover:text-blue-900 mr-4">
                                         <i class="fas fa-edit mr-1"></i>Edit
                                     </a>
-                                    <form action="{{ route('costumers.destroy', $costumer) }}" method="POST"
+                                    <form action="{{ route('customers.destroy', $customer) }}" method="POST"
                                         class="inline-block">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="text-red-600 hover:text-red-900 delete-customer"
-                                            data-customer-id="{{ $costumer->id }}">
+                                            data-customer-id="{{ $customer->id }}">
                                             <i class="fas fa-trash-alt mr-1"></i>Delete
                                         </button>
                                     </form>
@@ -91,7 +91,7 @@
             </div>
 
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
-                {{ $costumers->links() }}
+                {{ $customers->links() }}
             </div>
         </div>
     </div>
@@ -174,7 +174,7 @@
                         // Creăm și trimitem formularul de ștergere
                         const form = document.createElement('form');
                         form.method = 'POST';
-                        form.action = `/costumers/${customerIdToDelete}`;
+                        form.action = `/customers/${customerIdToDelete}`;
                         form.innerHTML = `
                     @csrf
                     @method('DELETE')

@@ -7,6 +7,56 @@ use Illuminate\Http\Request;
 
 class LocationController extends Controller
 {
+    public function index()
+    {
+        $locations = Location::orderBy('facility_name')->get();
+        return response()->json($locations);
+    }
+
+    public function show(Location $location)
+    {
+        return response()->json([
+            'success' => true,
+            'location' => $location
+        ])->header('Content-Type', 'application/json');
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('query');
+
+        $locations = Location::where('facility_name', 'LIKE', "%{$query}%")
+            ->orWhere('address', 'LIKE', "%{$query}%")
+            ->orderBy('facility_name')
+            ->limit(10)
+            ->get();
+
+        return response()->json($locations);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'facility_name' => 'required|string|max:255',
+                'address' => 'required|string',
+                'notes' => 'nullable|string'
+            ]);
+
+            $location = Location::create($validated);
+
+            return response()->json([
+                'success' => true,
+                'location' => $location
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error creating location: ' . $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function update(Request $request, Location $location)
     {
         try {
@@ -23,51 +73,36 @@ class LocationController extends Controller
                 'location' => $location->fresh()
             ]);
         } catch (\Exception $e) {
-            \Log::error('Location update error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Error updating location: ' . $e->getMessage()
-            ], 500);
+            ], 422);
         }
     }
 
-    public function store(Request $request)
+    public function destroy(Location $location)
     {
         try {
-            $validated = $request->validate([
-                'facility_name' => 'required',
-                'address' => 'required',
-                'notes' => 'nullable'
-            ]);
+            // Verificăm dacă locația este folosită în loads
+            $isUsed = \App\Models\Load::where('shipper_name', $location->facility_name)
+                ->orWhere('receiver_name', $location->facility_name)
+                ->exists();
 
-            $location = Location::create([
-                'facility_name' => $request->facility_name,
-                'address' => $request->address,
-                'notes' => $request->notes
-            ]);
+            if ($isUsed) {
+                throw new \Exception('This location is being used in one or more loads and cannot be deleted.');
+            }
+
+            $location->delete();
 
             return response()->json([
                 'success' => true,
-                'location' => $location
+                'message' => 'Location deleted successfully'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Location store error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
-            ], 500);
+            ], 422);
         }
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->get('query');
-
-        $locations = Location::where('facility_name', 'LIKE', "%{$query}%")
-            ->orWhere('address', 'LIKE', "%{$query}%")
-            ->limit(10)
-            ->get();
-
-        return response()->json($locations);
     }
 }

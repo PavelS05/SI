@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Load;
-use App\Models\Costumer;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -39,7 +39,7 @@ class DashboardController extends Controller
        // Pentru sales și csr - doar customerii lor
        $customerCount = 0;
        if (in_array($user->role, ['sales', 'csr'])) {
-           $customerCount = Costumer::where('sales_rep1', $user->username)
+           $customerCount = Customer::where('sales_rep1', $user->username)
                ->orWhere('sales_rep2', $user->username)
                ->count();
        }

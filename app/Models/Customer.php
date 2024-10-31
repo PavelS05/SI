@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-// app/Models/Costumer.php
-class Costumer extends Model
+// app/Models/customer.php
+class Customer extends Model
 {
     protected $fillable = [
         'name',
@@ -22,6 +22,6 @@ class Costumer extends Model
     // Relație cu loads
     public function loads()
     {
-        return $this->hasMany(Load::class, 'costumer', 'id');
+        return $this->hasMany(Load::class, 'customer', 'id');
     }
 }
