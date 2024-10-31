@@ -1,66 +1,65 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Atlantis - Sistem de Management pentru Logistică
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Descriere
+Atlantis este o aplicație web robustă dezvoltată pentru gestionarea eficientă a operațiunilor logistice. Proiectată pentru companii de transport și logistică, aceasta oferă o soluție completă pentru managementul încărcăturilor, clienților, și transportatorilor.
 
-## About Laravel
+## Caracteristici Principale
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Dashboard Interactiv**: Oferă o privire de ansamblu asupra operațiunilor curente, inclusiv statistici despre încărcături și clienți.
+- **Managementul Încărcăturilor**: Permite crearea, editarea și urmărirea încărcăturilor în timp real.
+- **Gestionarea Clienților și Transportatorilor**: Sistem integrat pentru administrarea informațiilor despre clienți și transportatori.
+- **Sistem de Roluri și Permisiuni**: Suportă multiple roluri de utilizatori (admin, operațiuni, vânzări, serviciu clienți) cu permisiuni specifice.
+- **Raportare și Analiză**: Generează rapoarte detaliate și oferă analize pentru a ajuta la luarea deciziilor informate.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tehnologii Utilizate
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Backend**: Laravel (PHP)
+- **Frontend**: Blade Templates, TailwindCSS
+- **Bază de Date**: MySQL
+- **Autentificare**: Laravel built-in authentication
 
-## Learning Laravel
+## Instalare
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clonați repository-ul:
+git clone https://github.com/your-username/atlantis.git
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Insert Code
+Edit
+Copy code
+2. Instalați dependințele:
+composer install npm install && npm run dev
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Insert Code
+Edit
+Copy code
+3. Copiați fișierul `.env.example` în `.env` și configurați variabilele de mediu, inclusiv conexiunea la baza de date.
+4. Generați cheia aplicației:
+php artisan key:generate
 
-## Laravel Sponsors
+Insert Code
+Edit
+Copy code
+5. Rulați migrările pentru a crea structura bazei de date:
+php artisan migrate
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Insert Code
+Edit
+Copy code
+6. (Opțional) Populați baza de date cu date de test:
+php artisan db:seed
 
-### Premium Partners
+## Utilizare
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+După instalare, puteți accesa aplicația prin browser-ul web. Utilizați credențialele de administrator pentru a vă autentifica și a începe configurarea sistemului.
 
-## Contributing
+## Contribuție
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Contribuțiile sunt binevenite! Vă rugăm să citiți `CONTRIBUTING.md` pentru detalii despre procesul nostru de trimitere a pull request-urilor.
 
-## Code of Conduct
+## Licență
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Acest proiect este licențiat sub [MIT License](LICENSE).
 
-## Security Vulnerabilities
+## Contact
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Pentru întrebări sau suport, vă rugăm să deschideți un issue în repository-ul GitHub sau să contactați echipa de dezvoltare la [adresa_de_email@exemplu.com](mailto:adresa_de_email@exemplu.com).
