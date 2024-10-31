@@ -61,6 +61,6 @@ protected $middlewareAliases = [
     'signed' => \Illuminate\Auth\Middleware\ValidateSignature::class,
     'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
     'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-    'role' => \App\Http\Middleware\CheckRole::class,  // Adaugă această linie
+    'role' => \App\Http\Middleware\CheckRole::class, 
 ];
 }

@@ -9,38 +9,39 @@ use Illuminate\Http\Request;
 
 class LoadController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Load::query()->with(['carrierRelation', 'costumerRelation', 'salesUser', 'dispatcherUser']);
+public function index(Request $request)
+{
+    $query = Load::query();
 
-        // Implementăm căutarea globală
-        if ($request->has('search')) {
-            $searchTerm = $request->search;
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('load_number', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('shipper_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('receiver_name', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('carrier', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('costumer', 'LIKE', "%{$searchTerm}%");
-            });
-        }
-
-        // Filtrare după status
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // Filtrare după dată
-        if ($request->has('date_from')) {
-            $query->where('pu_date', '>=', $request->date_from);
-        }
-        if ($request->has('date_to')) {
-            $query->where('pu_date', '<=', $request->date_to);
-        }
-
-        $loads = $query->orderBy('created_at', 'desc')->paginate(15);
-        return view('loads.index', compact('loads'));
+    // Doar sales vede doar load-urile proprii
+    if (auth()->user()->role === 'sales') {
+        $query->where('sales', auth()->user()->username);
     }
+
+    // Căutare și filtre existente
+    if ($request->has('search')) {
+        $searchTerm = $request->search;
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('load_number', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('costumer', 'LIKE', "%{$searchTerm}%")
+              ->orWhere('carrier', 'LIKE', "%{$searchTerm}%");
+        });
+    }
+
+    if ($request->status && $request->status !== 'All') {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->date_from) {
+        $query->where('pu_date', '>=', $request->date_from);
+    }
+    if ($request->date_to) {
+        $query->where('pu_date', '<=', $request->date_to);
+    }
+
+    $loads = $query->orderBy('created_at', 'desc')->paginate(15);
+    return view('loads.index', compact('loads'));
+}
 
     public function create()
     {

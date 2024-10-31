@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atlantis - @yield('title')</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="https://kit.fontawesome.com/4b9ba14b0f.js" crossorigin="anonymous"></script>
 </head>
+
 <body class="bg-gray-100">
     <!-- Navigation -->
     <nav class="bg-white shadow-lg">
@@ -22,30 +26,30 @@
                     <!-- Navigation Links -->
                     @auth
                         <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <a href="{{ route('loads.index') }}" 
-                               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <a href="{{ route('loads.index') }}"
+                                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Loads
                             </a>
 
-                            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'csr')
-                            <a href="{{ route('carriers.index') }}"
-                               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Carriers
-                            </a>
+                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr')
+                                <a href="{{ route('carriers.index') }}"
+                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    Carriers
+                                </a>
                             @endif
 
-                            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'csr' || auth()->user()->role === 'sales')
-                            <a href="{{ route('costumers.index') }}"
-                               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Customers
-                            </a>
+                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr' || auth()->user()->role === 'sales')
+                                <a href="{{ route('costumers.index') }}"
+                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    Customers
+                                </a>
                             @endif
 
-                            @if(auth()->user()->role === 'admin')
-                            <a href="{{ route('users.index') }}"
-                               class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Users
-                            </a>
+                            @if (auth()->user()->role === 'admin')
+                                <a href="{{ route('users.index') }}"
+                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                    Users
+                                </a>
                             @endif
                         </div>
                     @endauth
@@ -71,13 +75,14 @@
 
     <!-- Page Content -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                role="alert">
                 <span class="block sm:inline">{{ session('success') }}</span>
             </div>
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span class="block sm:inline">{{ session('error') }}</span>
             </div>
@@ -85,5 +90,7 @@
 
         @yield('content')
     </main>
+    @stack('scripts')
 </body>
+
 </html>

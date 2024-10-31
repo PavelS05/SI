@@ -11,6 +11,6 @@ export default {
     extend: {},
   },
   plugins: [
-    require('@tailwindcss/forms'), // Adaugă asta pentru stilizarea formularelor
+    require('@tailwindcss/forms'), 
   ],
 }
