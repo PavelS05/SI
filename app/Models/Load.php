@@ -14,9 +14,9 @@ class Load extends Model
         'customer_rate',
         'carrier',
         'carrier_rate',
-        'equipment_type',  // câmp nou
-        'driver_name',     // câmp nou
-        'driver_contact',  // câmp nou
+        'equipment_type',  
+        'driver_name',     
+        'driver_contact',  
         'service',
         'shipper_name',
         'shipper_address',

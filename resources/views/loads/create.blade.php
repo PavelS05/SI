@@ -245,7 +245,12 @@
                                         <input type="text" id="shipper_search" placeholder="Search locations..."
                                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             autocomplete="off">
+                                        <!-- În secțiunea Shipper după shipper_id -->
                                         <input type="hidden" id="shipper_id" name="shipper_id">
+                                        <input type="hidden" id="shipper_name" name="shipper_name"
+                                            value="{{ $load->shipper_name ?? '' }}">
+                                        <input type="hidden" id="shipper_address" name="shipper_address"
+                                            value="{{ $load->shipper_address ?? '' }}">
                                         <div id="shipper_suggestions"
                                             class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden max-h-60 overflow-y-auto">
                                         </div>
@@ -316,7 +321,12 @@
                                         <input type="text" id="receiver_search" placeholder="Search locations..."
                                             class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                             autocomplete="off">
+                                        <!-- În secțiunea Receiver după receiver_id -->
                                         <input type="hidden" id="receiver_id" name="receiver_id">
+                                        <input type="hidden" id="receiver_name" name="receiver_name"
+                                            value="{{ $load->receiver_name ?? '' }}">
+                                        <input type="hidden" id="receiver_address" name="receiver_address"
+                                            value="{{ $load->receiver_address ?? '' }}">
                                         <div id="receiver_suggestions"
                                             class="absolute z-10 w-full bg-white shadow-lg rounded-md mt-1 hidden max-h-60 overflow-y-auto">
                                         </div>
@@ -363,26 +373,25 @@
                         </div>
                     </div>
                 </div>
-
-                    <!-- Action Buttons -->
-                    <div class="mt-6 bg-gray-50 px-6 py-4 flex items-center justify-end space-x-4 rounded-lg">
-                        <a href="{{ route('loads.index') }}"
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Cancel
-                        </a>
-                        <button type="submit"
-                            class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                            <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="{{ isset($load) ? 'M5 13l4 4L19 7' : 'M12 6v6m0 0v6m0-6h6m-6 0H6' }}" />
-                            </svg>
-                            {{ isset($load) ? 'Update Load' : 'Create Load' }}
-                        </button>
-                    </div>
+                <!-- Action Buttons -->
+                <div class="mt-6 bg-gray-50 px-6 py-4 flex items-center justify-end space-x-4 rounded-lg">
+                    <a href="{{ route('loads.index') }}"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <svg class="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="{{ isset($load) ? 'M5 13l4 4L19 7' : 'M12 6v6m0 0v6m0-6h6m-6 0H6' }}" />
+                        </svg>
+                        {{ isset($load) ? 'Update Load' : 'Create Load' }}
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -474,6 +483,26 @@
                     }
                 }
 
+                // Adaugă acest cod în DOMContentLoaded event handler
+                document.querySelector('form').addEventListener('submit', function(e) {
+                    const shipperName = document.getElementById('shipper_name')?.value;
+                    const shipperAddress = document.getElementById('shipper_address')?.value;
+                    const receiverName = document.getElementById('receiver_name')?.value;
+                    const receiverAddress = document.getElementById('receiver_address')?.value;
+
+                    if (!shipperName || !shipperAddress) {
+                        e.preventDefault();
+                        alert('Please select a shipper location');
+                        return;
+                    }
+
+                    if (!receiverName || !receiverAddress) {
+                        e.preventDefault();
+                        alert('Please select a receiver location');
+                        return;
+                    }
+                });
+
                 // Setup location search for both shipper and receiver
                 ['shipper', 'receiver'].forEach(type => {
                     const searchInput = document.getElementById(`${type}_search`);
@@ -531,13 +560,26 @@
                     const detailsDiv = document.getElementById(`${type}_details`);
                     const searchInput = document.getElementById(`${type}_search`);
                     const idInput = document.getElementById(`${type}_id`);
+                    const nameInput = document.getElementById(`${type}_name`);
+                    const addressInput = document.getElementById(`${type}_address`);
 
+                    // Actualizăm inputurile hidden
+                    nameInput.value = location.facility_name;
+                    addressInput.value = location.address;
+                    idInput.value = location.id;
+
+                    // Actualizăm display-ul
                     document.getElementById(`selected_${type}_name`).textContent = location.facility_name;
                     document.getElementById(`selected_${type}_address`).textContent = location.address;
-                    document.getElementById(`selected_${type}_notes`).textContent = location.notes || '';
+                    if (location.notes) {
+                        document.getElementById(`selected_${type}_notes`).textContent = location.notes;
+                        document.getElementById(`selected_${type}_notes`).classList.remove('hidden');
+                    } else {
+                        document.getElementById(`selected_${type}_notes`).classList.add('hidden');
+                    }
 
+                    // Actualizăm search input și afișăm detaliile
                     searchInput.value = location.facility_name;
-                    idInput.value = location.id;
                     detailsDiv.classList.remove('hidden');
                 }
 
@@ -631,26 +673,6 @@
                         modal.classList.remove('hidden');
                     });
                 });
-
-                // Modificăm funcția de selectare a locației pentru a salva ID-ul
-                function selectLocation(location, type) {
-                    const detailsDiv = document.getElementById(`${type}_details`);
-                    const searchInput = document.getElementById(`${type}_search`);
-                    const idInput = document.getElementById(`${type}_id`);
-
-                    document.getElementById(`selected_${type}_name`).textContent = location.facility_name;
-                    document.getElementById(`selected_${type}_address`).textContent = location.address;
-                    if (location.notes) {
-                        document.getElementById(`selected_${type}_notes`).textContent = location.notes;
-                        document.getElementById(`selected_${type}_notes`).classList.remove('hidden');
-                    } else {
-                        document.getElementById(`selected_${type}_notes`).classList.add('hidden');
-                    }
-
-                    searchInput.value = location.facility_name;
-                    idInput.value = location.id; // Salvăm ID-ul locației
-                    detailsDiv.classList.remove('hidden');
-                }
 
                 // Modificăm handler-ul pentru submit-ul formularului
                 form.addEventListener('submit', async function(e) {
@@ -750,12 +772,22 @@
                         errorAlert.classList.add('hidden');
                     }
                 });
-            });
-        </script>
-    @endpush
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
+
+                ['shipper', 'receiver'].forEach(type => {
+                    const name = document.getElementById(`${type}_name`)?.value;
+                    const address = document.getElementById(`${type}_address`)?.value;
+
+                    if (name && address) {
+                        const detailsDiv = document.getElementById(`${type}_details`);
+                        const searchInput = document.getElementById(`${type}_search`);
+
+                        document.getElementById(`selected_${type}_name`).textContent = name;
+                        document.getElementById(`selected_${type}_address`).textContent = address;
+                        searchInput.value = name;
+                        detailsDiv.classList.remove('hidden');
+                    }
+                });
+
                 function setupAutocomplete(searchInputId, hiddenInputId, suggestionsId, data) {
                     const searchInput = document.getElementById(searchInputId);
                     const hiddenInput = document.getElementById(hiddenInputId);
