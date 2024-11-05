@@ -10,82 +10,78 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-   public function index()
-   {
-       $user = auth()->user();
+public function index()
+{
+    $user = auth()->user();
+    $lastWeek = now()->subDays(7);
 
-       // Pentru admin - statistici globale
-       if ($user->role === 'admin') {
-           $newLoads = Load::where('status', 'new')->count();
-           $dispatchedLoads = Load::where('status', 'dispatched')->count();
-           $inTransitLoads = Load::where('status', 'in_transit')->count();
-           $deliveredLoads = Load::where('status', 'delivered')->count();
-       } else {
-           // Pentru alți useri - doar loadurile lor
-           $newLoads = Load::where('status', 'new')
-               ->where('sales', $user->username)
-               ->count();
-           $dispatchedLoads = Load::where('status', 'dispatched')
-               ->where('sales', $user->username)
-               ->count();
-           $inTransitLoads = Load::where('status', 'in_transit')
-               ->where('sales', $user->username)
-               ->count();
-           $deliveredLoads = Load::where('status', 'delivered')
-               ->where('sales', $user->username)
-               ->count();
-       }
+    // Query de bază
+    $baseQuery = Load::query();
+    if ($user->role !== 'admin') {
+        $baseQuery->where('sales', $user->username);
+    }
 
-       // Pentru sales și csr - doar customerii lor
-       $customerCount = 0;
-       if (in_array($user->role, ['sales', 'csr'])) {
-           $customerCount = Customer::where('sales_rep1', $user->username)
-               ->orWhere('sales_rep2', $user->username)
-               ->count();
-       }
+    // Statistici - folosim clone pentru a nu afecta query-ul original
+    $newLoads = (clone $baseQuery)
+        ->where('status', 'new')
+        ->where('created_at', '>=', $lastWeek)
+        ->count();
 
-       // Monthly Trends
-       $monthlyData = Load::when($user->role === 'sales', function($query) use ($user) {
-               return $query->where('sales', $user->username);
-           })
-           ->where('created_at', '>', now()->subMonths(6))
-           ->select(
-               DB::raw('YEAR(created_at) as year'),
-               DB::raw('MONTH(created_at) as month'),
-               DB::raw('count(*) as count')
-           )
-           ->groupBy('year', 'month')
-           ->orderBy('year')
-           ->orderBy('month')
-           ->get()
-           ->map(function($item) {
-               $date = Carbon::createFromDate($item->year, $item->month);
-               return [
-                   'month' => $date->format('F Y'),
-                   'count' => $item->count
-               ];
-           });
+    $dispatchedLoads = (clone $baseQuery)
+        ->where('status', 'dispatched')
+        ->count();
 
-       $labels = $monthlyData->pluck('month');
-       $data = $monthlyData->pluck('count');
+    $inTransitLoads = (clone $baseQuery)
+        ->where('status', 'in_transit')
+        ->count();
 
-       // Loads recente
-       $recentLoads = Load::when($user->role === 'sales', function($query) use ($user) {
-               return $query->where('sales', $user->username);
-           })
-           ->orderBy('created_at', 'desc')
-           ->take(5)
-           ->get();
+    $deliveredLoads = (clone $baseQuery)
+        ->where('status', 'delivered')
+        ->whereMonth('created_at', now()->month)
+        ->count();
 
-       return view('dashboard', compact(
-           'newLoads',
-           'dispatchedLoads',
-           'inTransitLoads',
-           'deliveredLoads',
-           'customerCount',
-           'labels',
-           'data',
-           'recentLoads'
-       ));
-   }
+    // Recent Loads
+    $recentLoads = (clone $baseQuery)
+        ->latest()
+        ->with(['customerRelation'])
+        ->take(5)
+        ->get();
+
+    // Monthly trends
+    $monthlyData = (clone $baseQuery)
+        ->where('created_at', '>', now()->subMonths(6))
+        ->select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('count(*) as count'),
+            DB::raw('SUM(customer_rate - carrier_rate) as profit')
+        )
+        ->groupBy('year', 'month')
+        ->orderBy('year', 'desc')
+        ->orderBy('month', 'desc')
+        ->get()
+        ->take(5)
+        ->map(function($item) {
+            $date = Carbon::createFromDate($item->year, $item->month);
+            return [
+                'month' => $date->format('F Y'),
+                'count' => $item->count,
+                'profit' => $item->profit
+            ];
+        });
+
+    $monthlyData = $monthlyData->reverse()->values();
+    $labels = $monthlyData->pluck('month');
+    $data = $monthlyData->pluck('count');
+
+    return view('dashboard', compact(
+        'newLoads',
+        'dispatchedLoads',
+        'inTransitLoads',
+        'deliveredLoads',
+        'recentLoads',
+        'labels',
+        'data'
+    ));
+}
 }

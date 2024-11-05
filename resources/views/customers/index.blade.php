@@ -30,7 +30,7 @@
 
             <!-- Customers Table -->
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 hidden md:table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name
@@ -88,6 +88,71 @@
                         @endforelse
                     </tbody>
                 </table>
+                <div class="md:hidden space-y-4">
+                    @foreach ($customers as $customer)
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="p-4 space-y-3">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <span class="text-sm font-medium text-gray-600">Customer Name</span>
+                                        <p class="text-lg font-bold text-gray-900">{{ $customer->name }}</p>
+                                    </div>
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold rounded-full {{ $customer->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ ucfirst($customer->status) }}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user text-gray-400 w-5"></i>
+                                        <span class="ml-2">{{ $customer->contact_name }}</span>
+                                    </div>
+
+                                    <div class="flex items-center">
+                                        <i class="fas fa-phone text-gray-400 w-5"></i>
+                                        <a href="tel:{{ $customer->phone }}" class="ml-2 text-blue-600">
+                                            {{ $customer->phone }}
+                                        </a>
+                                    </div>
+
+                                    <div class="flex items-center">
+                                        <i class="fas fa-envelope text-gray-400 w-5"></i>
+                                        <a href="mailto:{{ $customer->email }}" class="ml-2 text-blue-600">
+                                            {{ $customer->email }}
+                                        </a>
+                                    </div>
+
+                                    <div class="flex items-center">
+                                        <i class="fas fa-dollar-sign text-gray-400 w-5"></i>
+                                        <span class="ml-2">${{ number_format($customer->credit, 2) }}</span>
+                                    </div>
+
+                                    @if ($customer->sales_rep1)
+                                        <div class="flex items-center">
+                                            <i class="fas fa-user-tie text-gray-400 w-5"></i>
+                                            <span class="ml-2">Rep: {{ $customer->sales_rep1 }}</span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="pt-3 border-t border-gray-200 flex justify-end space-x-3">
+                                    <a href="{{ route('customers.edit', $customer) }}"
+                                        class="inline-flex items-center px-3 py-2 border border-blue-600 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Edit
+                                    </a>
+                                    <button type="button"
+                                        class="inline-flex items-center px-3 py-2 border border-red-600 rounded-md text-sm font-medium text-red-600 hover:bg-red-50 delete-customer"
+                                        data-customer-id="{{ $customer->id }}">
+                                        <i class="fas fa-trash-alt mr-1"></i>
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
 
             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
