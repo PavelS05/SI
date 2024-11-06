@@ -22,11 +22,11 @@
                     @if (isset($load))
                         <div class="text-right">
                             <span
-                                class="px-3 py-1 text-sm rounded-full {{ $load->status === 'New'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : ($load->status === 'Delivered'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-yellow-100 text-yellow-800') }}">
+                                class="px-3 py-1 text-sm rounded-full 
+    @if ($load->status === 'New') bg-blue-100 text-blue-800
+    @elseif($load->status === 'In transit') bg-purple-100 text-purple-800
+    @elseif($load->status === 'Dispatched') bg-yellow-100 text-yellow-800
+    @else bg-green-100 text-green-800 @endif">
                                 {{ $load->status }}
                             </span>
                         </div>
@@ -116,7 +116,7 @@
                                     <label for="status" class="block text-sm font-medium text-gray-700">Status*</label>
                                     <select id="status" name="status" required
                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                        @foreach (['New', 'Assigned', 'In Transit', 'Delivered'] as $status)
+                                        @foreach (['New', 'Dispatched', 'In transit', 'Delivered'] as $status)
                                             <option value="{{ $status }}"
                                                 {{ isset($load) && $load->status == $status ? 'selected' : '' }}>
                                                 {{ $status }}
@@ -278,8 +278,8 @@
                                 <!-- Pickup Date -->
                                 <div>
                                     <label for="pu_date" class="block text-sm font-medium text-gray-700">Pickup
-                                        Date*</label>
-                                    <input type="date" id="pu_date" name="pu_date" required
+                                        Date</label>
+                                    <input type="date" id="pu_date" name="pu_date"
                                         value="{{ $load->pu_date ?? '' }}"
                                         class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                                 </div>
@@ -354,8 +354,8 @@
                                 <!-- Delivery Date -->
                                 <div>
                                     <label for="del_date" class="block text-sm font-medium text-gray-700">Delivery
-                                        Date*</label>
-                                    <input type="date" id="del_date" name="del_date" required
+                                        Date</label>
+                                    <input type="date" id="del_date" name="del_date"
                                         value="{{ $load->del_date ?? '' }}"
                                         class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                                 </div>

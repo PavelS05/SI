@@ -37,7 +37,7 @@ public function index()
 
     $deliveredLoads = (clone $baseQuery)
         ->where('status', 'delivered')
-        ->whereMonth('created_at', now()->month)
+        ->whereMonth('del_date', now()->month)
         ->count();
 
     // Recent Loads
@@ -49,10 +49,10 @@ public function index()
 
     // Monthly trends
     $monthlyData = (clone $baseQuery)
-        ->where('created_at', '>', now()->subMonths(6))
+        ->where('del_date', '>', now()->subMonths(6))
         ->select(
-            DB::raw('YEAR(created_at) as year'),
-            DB::raw('MONTH(created_at) as month'),
+            DB::raw('YEAR(del_date) as year'),
+            DB::raw('MONTH(del_date) as month'),
             DB::raw('count(*) as count'),
             DB::raw('SUM(customer_rate - carrier_rate) as profit')
         )

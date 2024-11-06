@@ -15,63 +15,86 @@
     <nav class="bg-white shadow-lg">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
-                <div class="flex">
+                <!-- Logo și meniu -->
+                <div class="flex items-center justify-between w-full">
                     <!-- Logo -->
-                    <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('dashboard') }}" class="text-xl font-bold text-blue-600">
-                            Atlantis
-                        </a>
-                    </div>
+                    <a href="{{ route('dashboard') }}" class="text-xl font-bold text-blue-600">
+                        Atlantis
+                    </a>
 
-                    <!-- Navigation Links -->
+                    <!-- Hamburger pentru mobile -->
                     @auth
-                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <a href="{{ route('loads.index') }}"
-                                class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                Loads
-                            </a>
+                        <button type="button" class="sm:hidden" onclick="toggleMenu()">
+                            <svg class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16m-7 6h7" />
+                            </svg>
+                        </button>
+                    @endauth
 
+                    <!-- Meniu desktop -->
+                    @auth
+                        <div class="hidden sm:flex sm:space-x-8">
+                            <a href="{{ route('loads.index') }}" class="text-gray-500 hover:text-gray-700">Loads</a>
                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr')
                                 <a href="{{ route('carriers.index') }}"
-                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Carriers
-                                </a>
+                                    class="text-gray-500 hover:text-gray-700">Carriers</a>
                             @endif
-
                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr' || auth()->user()->role === 'sales')
                                 <a href="{{ route('customers.index') }}"
-                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Customers
-                                </a>
+                                    class="text-gray-500 hover:text-gray-700">Customers</a>
                             @endif
-
                             @if (auth()->user()->role === 'admin')
-                                <a href="{{ route('users.index') }}"
-                                    class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                                    Users
-                                </a>
+                                <a href="{{ route('users.index') }}" class="text-gray-500 hover:text-gray-700">Users</a>
                             @endif
                         </div>
-                    @endauth
-                </div>
 
-                <!-- Right Side -->
-                <div class="flex items-center">
-                    @auth
-                        <div class="ml-3 relative">
+                        <!-- User info & Logout -->
+                        <div class="hidden sm:flex sm:items-center">
                             <span class="text-gray-700">{{ auth()->user()->username }}</span>
                             <form method="POST" action="{{ route('logout') }}" class="inline-block ml-4">
                                 @csrf
-                                <button type="submit" class="text-gray-500 hover:text-gray-700">
-                                    Logout
-                                </button>
+                                <button type="submit" class="text-gray-500 hover:text-gray-700">Logout</button>
                             </form>
                         </div>
                     @endauth
                 </div>
             </div>
+
+            <!-- Meniu mobile -->
+            @auth
+                <div id="mobile-menu" class="hidden sm:hidden">
+                    <div class="px-2 pt-2 pb-3 space-y-1">
+                        <a href="{{ route('loads.index') }}"
+                            class="block px-3 py-2 text-gray-500 hover:text-gray-700">Loads</a>
+                        @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr')
+                            <a href="{{ route('carriers.index') }}"
+                                class="block px-3 py-2 text-gray-500 hover:text-gray-700">Carriers</a>
+                        @endif
+                        @if (auth()->user()->role === 'admin' || auth()->user()->role === 'csr' || auth()->user()->role === 'sales')
+                            <a href="{{ route('customers.index') }}"
+                                class="block px-3 py-2 text-gray-500 hover:text-gray-700">Customers</a>
+                        @endif
+                        @if (auth()->user()->role === 'admin')
+                            <a href="{{ route('users.index') }}"
+                                class="block px-3 py-2 text-gray-500 hover:text-gray-700">Users</a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}" class="block px-3 py-2">
+                            @csrf
+                            <button type="submit" class="text-gray-500 hover:text-gray-700">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            @endauth
         </div>
     </nav>
+
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
 
     <!-- Page Content -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -91,6 +114,13 @@
         @yield('content')
     </main>
     @stack('scripts')
+
+    @auth
+        <script>
+            window.userRole = "{{ auth()->user()->role }}";
+        </script>
+        <div id="mobile-menu-mount"></div>
+    @endauth
 </body>
 
 </html>
