@@ -25,7 +25,7 @@ class LoadController extends Controller
                 $q->where('load_number', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('customer', 'LIKE', "%{$searchTerm}%")
                     ->orWhere('carrier', 'LIKE', "%{$searchTerm}%")
-                    ->orWhere('driver_name', 'LIKE', "%{$searchTerm}%");  // adăugat căutare după driver
+                    ->orWhere('driver_name', 'LIKE', "%{$searchTerm}%");  
             });
         }
 
@@ -46,7 +46,18 @@ class LoadController extends Controller
 
     public function create()
     {
-        $customers = Customer::select('id', 'name')->get();
+$user = auth()->user();
+        
+        // Filtrăm customers în funcție de rolul utilizatorului
+        if ($user->role === 'sales') {
+            $customers = Customer::where('sales_rep1', $user->username)
+                ->orWhere('sales_rep2', $user->username)
+                ->select('id', 'name')
+                ->get();
+        } else {
+            $customers = Customer::select('id', 'name')->get();
+        }
+
         $carriers = Carrier::select('id', 'name')->get();
 
         return view('loads.create', compact('customers', 'carriers'));
@@ -94,13 +105,23 @@ class LoadController extends Controller
 
     public function edit(Load $load)
     {
-        // Verifică permisiunile
         if (auth()->user()->role === 'sales' && $load->sales !== auth()->user()->username) {
             return redirect()->route('loads.index')
                 ->with('error', 'You are not authorized to edit this load.');
         }
 
-        $customers = Customer::select('id', 'name')->get();
+        $user = auth()->user();
+        
+        // Filtrăm customers în funcție de rolul utilizatorului
+        if ($user->role === 'sales') {
+            $customers = Customer::where('sales_rep1', $user->username)
+                ->orWhere('sales_rep2', $user->username)
+                ->select('id', 'name')
+                ->get();
+        } else {
+            $customers = Customer::select('id', 'name')->get();
+        }
+
         $carriers = Carrier::select('id', 'name')->get();
 
         return view('loads.edit', compact('load', 'customers', 'carriers'));

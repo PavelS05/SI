@@ -16,14 +16,18 @@
             <!-- Search -->
             <div class="px-6 py-4 bg-gray-50">
                 <form action="{{ route('carriers.index') }}" method="GET">
-                    <div class="flex">
+                    <div class="flex space-x-2">
                         <input type="text" name="search" placeholder="Search carriers..."
                             value="{{ request('search') }}"
                             class="w-full px-4 py-2 rounded-l-md border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                         <button type="submit"
-                            class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300 ease-in-out">
+                            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">
                             <i class="fas fa-search"></i>
                         </button>
+                        <a href="{{ route('carriers.index') }}"
+                            class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition duration-300 ease-in-out">
+                            <i class="fas fa-times"></i>
+                        </a>
                     </div>
                 </form>
             </div>
@@ -51,27 +55,69 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($carriers as $carrier)
-                            <tr class="hover:bg-gray-50">
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $carrier->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $carrier->mc }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $carrier->contact_name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $carrier->phone }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $carrier->email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">${{ number_format($carrier->insurance) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <a href="{{ route('carriers.edit', $carrier) }}"
-                                        class="text-blue-600 hover:text-blue-900 mr-4">
-                                        <i class="fas fa-edit mr-1"></i>Edit
+                            <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-medium text-gray-900">{{ $carrier->name }}</div>
+                                    @if ($carrier->dbo)
+                                        <div class="text-sm text-gray-500">DBA: {{ $carrier->dbo }}</div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        {{ $carrier->mc }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $carrier->contact_name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="tel:{{ $carrier->phone }}" class="text-blue-600 hover:text-blue-900 text-sm">
+                                        {{ $carrier->phone }}
                                     </a>
-                                    <button type="button" class="text-red-600 hover:text-red-900 delete-carrier"
-                                        data-carrier-id="{{ $carrier->id }}">
-                                        <i class="fas fa-trash-alt mr-1"></i>Delete
-                                    </button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <a href="mailto:{{ $carrier->email }}"
+                                        class="text-blue-600 hover:text-blue-900 text-sm">
+                                        {{ $carrier->email }}
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">
+                                        ${{ number_format($carrier->insurance, 0) }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex space-x-3">
+                                        <a href="{{ route('carriers.edit', $carrier) }}"
+                                            class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </a>
+                                        <button type="button"
+                                            class="text-red-600 hover:text-red-900 transition-colors duration-200 delete-carrier"
+                                            data-carrier-id="{{ $carrier->id }}">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-4 text-center text-gray-500">No carriers found</td>
+                                <td colspan="7" class="px-6 py-4 text-center text-gray-500">
+                                    <div class="flex flex-col items-center justify-center space-y-2">
+                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <span>No carriers found</span>
+                                    </div>
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -140,92 +186,15 @@
         </div>
     </div>
 
-    <div id="deleteModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog"
-        aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div
-                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div
-                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                Delete Carrier
-                            </h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500">
-                                    Are you sure you want to delete this carrier? This action cannot be undone.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" id="confirmDelete"
-                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Delete
-                    </button>
-                    <button type="button" id="cancelDelete"
-                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+
+    @include('partials.delete-modal')
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const deleteModal = document.getElementById('deleteModal');
-                const confirmDeleteBtn = document.getElementById('confirmDelete');
-                const cancelDeleteBtn = document.getElementById('cancelDelete');
-                let carrierIdToDelete = null;
-
-                // Funcție pentru a afișa modalul
-                function showModal() {
-                    deleteModal.classList.remove('hidden');
-                }
-
-                // Funcție pentru a ascunde modalul
-                function hideModal() {
-                    deleteModal.classList.add('hidden');
-                }
-
-                // Event listener pentru butoanele de ștergere
-                document.querySelectorAll('.delete-carrier').forEach(button => {
-                    button.addEventListener('click', function() {
-                        carrierIdToDelete = this.getAttribute('data-carrier-id');
-                        showModal();
-                    });
-                });
-
-                // Event listener pentru butonul de anulare
-                cancelDeleteBtn.addEventListener('click', hideModal);
-
-                // Event listener pentru butonul de confirmare
-                confirmDeleteBtn.addEventListener('click', function() {
-                    if (carrierIdToDelete) {
-                        // Creăm și trimitem formularul de ștergere
-                        const form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = `/carriers/${carrierIdToDelete}`;
-                        form.innerHTML = `
-                            @csrf
-                            @method('DELETE')
-                        `;
-                        document.body.appendChild(form);
-                        form.submit();
-                    }
+                initializeDeleteModal({
+                    itemType: 'Carrier', // sau 'Customer', 'Load' etc
+                    deleteUrl: '/carriers/', // sau '/customers/', '/loads/' etc
                 });
             });
         </script>

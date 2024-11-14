@@ -31,6 +31,19 @@
                             @enderror
                         </div>
 
+                        <!-- Email Field -->
+                        <div class="space-y-1">
+                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <input type="email" name="email" id="email" value="{{ $user->email }}" required
+                                    class="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors @error('email') border-red-300 @enderror"
+                                    placeholder="Enter email address">
+                            </div>
+                            @error('email')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <!-- Password Field -->
                         <div class="space-y-1">
                             <label for="password" class="block text-sm font-medium text-gray-700">New Password (leave empty

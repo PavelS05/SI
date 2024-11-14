@@ -21,11 +21,12 @@ class UserController extends Controller
 
    public function store(Request $request)
    {
-       $validated = $request->validate([
-           'username' => 'required|unique:users',
-           'password' => 'required|min:6',
-           'role' => 'required|in:admin,ops,sales,csr'
-       ]);
+$validated = $request->validate([
+    'username' => 'required|unique:users',
+    'email' => 'required|email|unique:users',
+    'password' => 'required|min:6',
+    'role' => 'required|in:admin,ops,sales,csr'
+]);
 
        $validated['password'] = Hash::make($validated['password']);
        User::create($validated);
@@ -39,22 +40,23 @@ class UserController extends Controller
    }
 
    public function update(Request $request, User $user)
-   {
-       $validated = $request->validate([
-           'username' => 'required|unique:users,username,'.$user->id,
-           'password' => 'nullable|min:6',
-           'role' => 'required|in:admin,ops,sales,csr'
-       ]);
+{
+    $validated = $request->validate([
+        'username' => 'required|unique:users,username,'.$user->id,
+        'email' => 'required|email|unique:users,email,'.$user->id,
+        'password' => 'nullable|min:6',
+        'role' => 'required|in:admin,ops,sales,csr'
+    ]);
 
-       if ($validated['password']) {
-           $validated['password'] = Hash::make($validated['password']);
-       } else {
-           unset($validated['password']);
-       }
+    if ($validated['password']) {
+        $validated['password'] = Hash::make($validated['password']);
+    } else {
+        unset($validated['password']);
+    }
 
-       $user->update($validated);
-       return redirect()->route('users.index')->with('success', 'User updated successfully');
-   }
+    $user->update($validated);
+    return redirect()->route('users.index')->with('success', 'User updated successfully');
+}
 
    public function destroy(User $user)
    {

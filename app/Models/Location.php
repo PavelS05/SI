@@ -10,6 +10,5 @@ class Location extends Model
         'facility_name',
         'address',
         'notes',
-        'fcfs'
     ];
 }

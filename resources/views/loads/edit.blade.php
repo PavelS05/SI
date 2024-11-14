@@ -95,7 +95,7 @@
                                     <select id="service" name="service" required
                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <option value="">Select Service</option>
-                                        @foreach (['FTL', 'LTL', 'Flatbed', 'Power Only', 'Hotshot', 'Box Truck', 'Sprinter Van'] as $service)
+                                        @foreach (['FTL', 'LTL'] as $service)
                                             <option value="{{ $service }}"
                                                 {{ isset($load) && $load->service == $service ? 'selected' : '' }}>
                                                 {{ $service }}
@@ -182,18 +182,12 @@
                                     <select id="equipment_type" name="equipment_type"
                                         class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                                         <option value="">Select Equipment</option>
-                                        <option value="Dry Van"
-                                            {{ isset($load) && $load->equipment_type == 'Dry Van' ? 'selected' : '' }}>
-                                            Dry Van</option>
-                                        <option value="Reefer"
-                                            {{ isset($load) && $load->equipment_type == 'Reefer' ? 'selected' : '' }}>
-                                            Reefer</option>
-                                        <option value="Flatbed"
-                                            {{ isset($load) && $load->equipment_type == 'Flatbed' ? 'selected' : '' }}>
-                                            Flatbed</option>
-                                        <option value="Step Deck"
-                                            {{ isset($load) && $load->equipment_type == 'Step Deck' ? 'selected' : '' }}>
-                                            Step Deck</option>
+                                        @foreach (['Dry Van', 'Reefer', 'Flatbed', 'Step Deck', 'Double Drop', 'Box Truck', 'LTL Truck', 'Curtainside', 'Tank Truck', 'Lowboy', 'Conestoga', 'Hot Shot', 'Power Only', 'Dump Truck', 'Walking Floor', 'Liftgate', 'Gooseneck', 'Removable Gooseneck (RGN)', 'Landoll', 'Car Carrier'] as $equipment)
+                                            <option value="{{ $equipment }}"
+                                                {{ isset($load) && $load->equipment_type == $equipment ? 'selected' : '' }}>
+                                                {{ $equipment }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
 
